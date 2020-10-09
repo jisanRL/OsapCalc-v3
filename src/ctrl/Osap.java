@@ -88,7 +88,27 @@ public class Osap extends HttpServlet {
 			String principal = request.getParameter("principal");
 			String userInterest = request.getParameter("interest");
 			String period = request.getParameter("period"); 				// grace period
-
+			
+			
+			//exception
+				
+			String errorMsg = "";
+			if (request.getParameter("principal") != null && (request.getParameter("period") != null)
+					&& (request.getParameter("interest") != null)) {
+				if (Double.parseDouble(principal) <= 0 ) {
+					errorMsg = "Principal must be greater than 0!";
+				} else if (Double.parseDouble((userInterest)) <= 0) {
+					errorMsg = "Annual Interest rate must be greater than 0!";
+				} else if (Double.parseDouble(period)<= 0) {
+					errorMsg = "Payment Period rate must be greater than 0!";
+				} else {
+					
+				}
+			}
+			
+			request.getServletContext().setAttribute("errorMessage", errorMsg);
+			request.getSession().setAttribute("errorMessage", errorMsg);
+			
 			
 			// input from query String [these are the user input values]
 			if (request.getParameterMap().isEmpty()) {
@@ -188,28 +208,28 @@ public class Osap extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	public void errormessage(HttpServletRequest request, HttpServletResponse response) {
-		double principal = Double.parseDouble(request.getParameter("principal"));
-		double userInterest = Double.parseDouble(request.getParameter("interest"));
-		double period = Double.parseDouble(request.getParameter("period")); 	
-		String errorMsg = "";
-		
-		if (request.getParameter("principal") != null && (request.getParameter("period") != null)
-				&& (request.getParameter("interest") != null)) {
-			if (principal <= 0 ) {
-				errorMsg = "Principal must be greater than 0!";
-			} else if (userInterest <= 0) {
-				errorMsg = "Annual Interest rate must be greater than 0!";
-			} else if (period <= 0) {
-				errorMsg = "Payment Period rate must be greater than 0!";
-			} else {
-				
-			}
-		}
-		
-		request.getServletContext().setAttribute("errorMessage", errorMsg);
-		request.getSession().setAttribute("errorMessage", errorMsg);
-	}
+//	public void errormessage(HttpServletRequest request, HttpServletResponse response) {
+//		double principal = Double.parseDouble(request.getParameter("principal"));
+//		double userInterest = Double.parseDouble(request.getParameter("interest"));
+//		double period = Double.parseDouble(request.getParameter("period")); 	
+//		String errorMsg = "";
+//		
+//		if (request.getParameter("principal") != null && (request.getParameter("period") != null)
+//				&& (request.getParameter("interest") != null)) {
+//			if (principal <= 0 ) {
+//				errorMsg = "Principal must be greater than 0!";
+//			} else if (userInterest <= 0) {
+//				errorMsg = "Annual Interest rate must be greater than 0!";
+//			} else if (period <= 0) {
+//				errorMsg = "Payment Period rate must be greater than 0!";
+//			} else {
+//				
+//			}
+//		}
+//		
+//		request.getServletContext().setAttribute("errorMessage", errorMsg);
+//		request.getSession().setAttribute("errorMessage", errorMsg);
+//	}
 	
 }
 

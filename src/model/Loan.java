@@ -37,10 +37,14 @@ public class Loan {
 		principal = Double.parseDouble(p);
 		userInterest = Double.parseDouble(i);
 		interest = Double.parseDouble(i) + Double.parseDouble(fi);
-		period = Double.parseDouble(g); 				// payment period
-		double gpp = Double.parseDouble(gp); 			// grace-period = 6
-
-		return (((interest / 100) / 12) * principal) / (1 - Math.pow(1 + ((interest / 100) / 12), -period));
+		period = Double.parseDouble(g); // payment period
+		
+		double gpp = Double.parseDouble(gp); // grace-period = 6
+		if (principal < 0 || userInterest < 0 || period < 0) {
+			throw (new Exception());
+		} else {
+			return (((interest / 100) / 12) * principal) / (1 - Math.pow(1 + ((interest / 100) / 12), -period));
+		}
 	}
 	
 	public double computeGraceInterest(String p, String gp, String i, String fi) throws Exception {
@@ -48,7 +52,11 @@ public class Loan {
 		interest = Double.parseDouble (i) + Double.parseDouble(fi);
 		period = Double.parseDouble(gp);    // graceperiod = 6 
 		
-		return  principal * ((interest / 100) / 12) * gracePeriod;
+		if (principal < 0 || Double.parseDouble (i) < 0 || period < 0) {
+			throw (new Exception());
+		} else {
+			return  principal * ((interest / 100) / 12) * gracePeriod; 
+		}
 	}
 	
 	public static void main(String[] args) {
