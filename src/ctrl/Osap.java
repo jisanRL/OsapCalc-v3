@@ -20,7 +20,9 @@ import model.Loan;
 @WebServlet({ "/Osap", "/Osap/*"  })						// * means -> all url with osap  
 public class Osap extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+	double graceInterest = 0, payment = 0;					// check this out this is the new  computation system
+	Loan ln =  new Loan();  								// method call for loan
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -29,28 +31,64 @@ public class Osap extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
     
-    
-//	@Override				// check
-//    public void init(ServletConfig config) throws ServletException {
-//		super.init(config);
-//		ServletContext context = getServletContext();
-//		
-//		String appName = context.getInitParameter(this.getServletContext().getInitParameter("applicationName"));						//	check
-//		double fixedInterest = Double.parseDouble(context.getInitParameter(this.getServletContext().getInitParameter("interest")));		//check    // Instantiate Loan object
-//		context.setAttribute("mLoan", new Loan());
-//    }
+    @Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		ServletContext context = getServletContext();
 
+		String principal = context.getInitParameter("principal");
+		String userInterest = context.getInitParameter("interest");
+		String period = context.getInitParameter("period");
+
+		// Instantiate Loan object
+		context.setAttribute("mLoan", new Loan());
+	}
+    
+    
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		Loan ln =  new Loan();  // method call for loan
+		/* 
+		 * input from web.xml [this are the default/built-in/hard-coded values]
+		 * these reads the web.xml file and returns the parameter value of the param-name
+		 * */
+		String default_principal = this.getServletContext().getInitParameter("principal"); 																									 
+		String default_period = this.getServletContext().getInitParameter("period");
+		String fixed_interest = this.getServletContext().getInitParameter("fixed interest");
+		String gracePeriod = this.getServletContext().getInitParameter("grace period");
 		
-		if (request.getParameter("calculate") == null) {
-			request.getRequestDispatcher("/UI.jspx").forward(request, response);  // send to UI page 
+		/*
+		 * user values, servlet retrieving data from the form, [user input the values]
+		 */
+		String principal = request.getParameter("principal");
+		String userInterest = request.getParameter("interest");
+		String period = request.getParameter("period"); 				// grace period
+		
+		//exception
+		String errorMsg = "";
+		
+		if (request.getParameter("calculate") == null ||
+				Double.parseDouble(principal) < 0 || Double.parseDouble(userInterest) < 0 || Double.parseDouble(period) < 0) {
 			
-		} else {
+				if (Double.parseDouble(request.getParameter("principal")) <= 0 ) {
+					errorMsg = "Principal must be greater than 0!";
+				} else if (Double.parseDouble(request.getParameter("interest")) <= 0) {
+					errorMsg = "Annual Interest rate must be greater than 0!";
+				} else if (Double.parseDouble(request.getParameter("period")) <= 0) {
+					errorMsg = "Payment Period rate must be greater than 0!";
+				} else {
+					errorMsg = "";
+				}
+			
+			request.getServletContext().setAttribute("errorMessage", errorMsg);
+			request.getSession().setAttribute("errorMessage", errorMsg);
+			request.getRequestDispatcher("/UI.jspx").forward(request, response);  // send to UI page 
+
+		} else if (request.getParameter("calculate") == null || 
+				Double.parseDouble(principal) > 0 || Double.parseDouble(userInterest) > 0 || Double.parseDouble(period) > 0) {
+			
 			response.getWriter().append("Served at: ").append(request.getContextPath());
 			response.setContentType("text/plain");
 			Writer resOut = response.getWriter();
@@ -67,105 +105,63 @@ public class Osap extends HttpServlet {
 			String foo = request.getParameter("foo"); 
 			String uri = request.getRequestURI().toString(); 								// URI
 			String servletPath = request.getServletPath(); 									// servlet path [this reads the web.xml file]
-			String contextPath = context.getContextPath(); // context path
-			String realPath = context.getRealPath("Osap"); // real path
-			
-			
-			/* 
-			 * input from web.xml [this are the default/built-in/hard-coded values]
-			 * these reads the web.xml file and returns the parameter value of the param-name
-			 * */
+			String contextPath = context.getContextPath(); 									// context path
+			String realPath = context.getRealPath("Osap"); 									// real path			
 
-			String default_principal = this.getServletContext().getInitParameter("principal"); 																									 
-			String default_period = this.getServletContext().getInitParameter("period");
-			String fixed_interest = this.getServletContext().getInitParameter("fixed interest");
-			String gracePeriod = this.getServletContext().getInitParameter("grace period");
-			
-			/*
-			 * user values, 
-			 * servlet retrieving data from the form, [user input the values]
-			 */
-			String principal = request.getParameter("principal");
-			String userInterest = request.getParameter("interest");
-			String period = request.getParameter("period"); 				// grace period
-			
-			
-			//exception
-				
-			String errorMsg = "";
-			if (request.getParameter("principal") != null && (request.getParameter("period") != null)
-					&& (request.getParameter("interest") != null)) {
-				if (Double.parseDouble(principal) <= 0 ) {
-					errorMsg = "Principal must be greater than 0!";
-				} else if (Double.parseDouble((userInterest)) <= 0) {
-					errorMsg = "Annual Interest rate must be greater than 0!";
-				} else if (Double.parseDouble(period)<= 0) {
-					errorMsg = "Payment Period rate must be greater than 0!";
+	
+				// input from query String [these are the user input values]
+				if (request.getParameterMap().isEmpty()) {
+					principal = default_principal; 				// the default values
+					period = default_period;
+					userInterest = fixed_interest;
 				} else {
-					
+					principal = principal; 						// the user values
+					period = period;
+					userInterest = userInterest; 
 				}
-			}
 			
-			request.getServletContext().setAttribute("errorMessage", errorMsg);
-			request.getSession().setAttribute("errorMessage", errorMsg);
-			
-			
-			// input from query String [these are the user input values]
-			if (request.getParameterMap().isEmpty()) {
-				principal = default_principal; 				// the default values
-				period = default_period;
-				userInterest = fixed_interest;
-			} else {
-				principal = principal; 						// the user values
-				period = period;
-				userInterest = userInterest; 
-			}
-			
-			double graceInterest = 0, payment = 0;
-			
-			// check this out this is the new  computation system
-			try {
-				if (request.getParameter("inputGrace") == null) {
-					graceInterest  = 0;
-				} else {
-					graceInterest = ln.computeGraceInterest(principal, gracePeriod, userInterest, fixed_interest);
+				try {
+					if (request.getParameter("inputGrace") == null) {
+						graceInterest  = 0;
+					} else {
+						graceInterest = ln.computeGraceInterest(principal, gracePeriod, userInterest, fixed_interest);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				if (request.getParameter("inputGrace") != null) {
-					payment = ln.computePayment(principal, userInterest, userInterest, period, gracePeriod, fixed_interest) + 
-							((graceInterest) / Double.parseDouble(gracePeriod));
-				} else {
-					payment = ln.computePayment(principal, userInterest, userInterest, period, gracePeriod, fixed_interest);
+				try {
+					if (request.getParameter("inputGrace") != null) {
+						payment = ln.computePayment(principal, userInterest, userInterest, period, gracePeriod, fixed_interest) + 
+								((graceInterest) / Double.parseDouble(gracePeriod));
+					} else {
+						payment = ln.computePayment(principal, userInterest, userInterest, period, gracePeriod, fixed_interest);
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+	
 			
 			// task E : save session, how do you get the data from servlet into the results page
 			HttpSession session = request.getSession();
 			request.getServletContext().setAttribute("APPNAME", appName);
-			request.getServletContext().setAttribute("PRINCIPAL", principal);
-			request.getServletContext().setAttribute("ANNUALINTEREST",userInterest);
-			request.getServletContext().setAttribute("PAYMENTPERIOD", period );
-			
-			request.getServletContext().setAttribute("GI", graceInterest);
-			request.getServletContext().setAttribute("PAY", payment);
-			
 			request.getSession().setAttribute("APPNAME", appName);
+			
+			request.getServletContext().setAttribute("PRINCIPAL", principal);
 			request.getSession().setAttribute("PRINCIPAL", principal);
+			
+			request.getServletContext().setAttribute("ANNUALINTEREST",userInterest);
 			request.getSession().setAttribute("ANNUALINTEREST",userInterest);
+
+			request.getServletContext().setAttribute("PAYMENTPERIOD", period );
 			request.getSession().setAttribute("PAYMENTPERIOD", period );
 			
+			request.getServletContext().setAttribute("GI", graceInterest);
 			request.getSession().setAttribute("GI", graceInterest);
+			
+			request.getServletContext().setAttribute("PAY", payment);
 			request.getSession().setAttribute("PAY", payment);
 
 			//check
@@ -176,28 +172,10 @@ public class Osap extends HttpServlet {
 			session.getServletContext().setAttribute("PAY", payment);
 			
 			request.getRequestDispatcher("/Results.jspx").forward(request, response);		// send to results page 
-
-//			debugs 
-			System.out.println("--------------default values----------------------------");
-			System.out.println("default_principal (trivial) = " + default_principal);
-			System.out.println("default_period (trivial) =  " + default_period);
-			System.out.println("fixed_interest =  " + fixed_interest);
-			System.out.println("grace period =  " + gracePeriod);
-			System.out.println("--------------user values----------------------------");
-			System.out.println("principal " + principal);
-			System.out.println("period " + period);
-			System.out.println("user interest " + userInterest);
-			System.out.println("------------------------------------------");
-			System.out.println("Grace Period = " + gracePeriod);
-			System.out.println("Grace Interest =  " + graceInterest);
-			System.out.println("------------------------------------------");
-			System.out.println("------------------------------------------");
-			System.out.println("Final calc: " + payment);
-			System.out.println("------------------------------------------");
-			System.out.println("Content length = " + request.getContentLength() + "\n" + "Content type = " + request.getContentType());
-			System.out.println("Hello, Got a " + cMethod + " request from Osap!");    
 		
-		} 
+		} else if (request.getParameter("restart") == null) {
+			request.getRequestDispatcher("/UI.jspx").forward(request, response);  // send to UI page 
+		}
 	}
 
 	/**
@@ -207,31 +185,24 @@ public class Osap extends HttpServlet {
 		// TODO Auto-generated method stub
 		doGet(request, response);
 	}
-	
-//	public void errormessage(HttpServletRequest request, HttpServletResponse response) {
-//		double principal = Double.parseDouble(request.getParameter("principal"));
-//		double userInterest = Double.parseDouble(request.getParameter("interest"));
-//		double period = Double.parseDouble(request.getParameter("period")); 	
-//		String errorMsg = "";
-//		
-//		if (request.getParameter("principal") != null && (request.getParameter("period") != null)
-//				&& (request.getParameter("interest") != null)) {
-//			if (principal <= 0 ) {
-//				errorMsg = "Principal must be greater than 0!";
-//			} else if (userInterest <= 0) {
-//				errorMsg = "Annual Interest rate must be greater than 0!";
-//			} else if (period <= 0) {
-//				errorMsg = "Payment Period rate must be greater than 0!";
-//			} else {
-//				
-//			}
-//		}
-//		
-//		request.getServletContext().setAttribute("errorMessage", errorMsg);
-//		request.getSession().setAttribute("errorMessage", errorMsg);
-//	}
-	
 }
 
-
-
+//debugs 
+//System.out.println("--------------default values----------------------------");
+//System.out.println("default_principal (trivial) = " + default_principal);
+//System.out.println("default_period (trivial) =  " + default_period);
+//System.out.println("fixed_interest =  " + fixed_interest);
+//System.out.println("grace period =  " + gracePeriod);
+//System.out.println("--------------user values----------------------------");
+//System.out.println("principal " + principal);
+//System.out.println("period " + period);
+//System.out.println("user interest " + userInterest);
+//System.out.println("------------------------------------------");
+//System.out.println("Grace Period = " + gracePeriod);
+//System.out.println("Grace Interest =  " + graceInterest);
+//System.out.println("------------------------------------------");
+//System.out.println("------------------------------------------");
+//System.out.println("Final calc: " + payment);
+//System.out.println("------------------------------------------");
+//System.out.println("Content length = " + request.getContentLength() + "\n" + "Content type = " + request.getContentType());
+//System.out.println("Hello, Got a " + cMethod + " request from Osap!");    

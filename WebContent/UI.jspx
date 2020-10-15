@@ -21,9 +21,7 @@
 	<form action="Osap" method="POST" class="osapForm">
 		<legend> ${APPNAME} </legend><BR /><BR />
 		
-		<label  class='error'> ${errorMessage} </label><BR />
-		
-		
+		<label  class="error"> ${errorMessage} </label><BR />
 		
 		<label for="principal"> Principal <BR /> <small>(total loan amount after studies)</small></label> 
 		<input type="number" step="0.01" id="principal" name="principal"></input> <br/>

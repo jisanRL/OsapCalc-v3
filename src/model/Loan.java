@@ -6,7 +6,7 @@ public class Loan {
 	private double principal;					// user: principal
 	private double userInterest;				// user: annual interest 
 	private double period; 						// user: payment period 
-	
+	private String errorMsg = " ";				// error message
 	
 	String applicationName = "OSAP Calculator 2020";
 	String applicantName = "Joe Doe";
@@ -56,6 +56,18 @@ public class Loan {
 			throw (new Exception());
 		} else {
 			return  principal * ((interest / 100) / 12) * gracePeriod; 
+		}
+	}
+	
+	public void errorMessage(double prinicpal, double userInterest, double period) {
+		if (principal <= 0) {
+			errorMsg = "Principal must be greater than 0!";
+		} else if (userInterest <= 0) {
+			errorMsg = "Annual Interest rate must be greater than 0!";
+		} else if (period <= 0) {
+			errorMsg = "Payment Period rate must be greater than 0!";
+		} else {
+			errorMsg = "";
 		}
 	}
 	
