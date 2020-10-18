@@ -6,7 +6,7 @@ public class Loan {
 	private double principal;					// user: principal
 	private double userInterest;				// user: annual interest 
 	private double period; 						// user: payment period 
-	private String errorMsg = " ";				// error message
+	
 	
 	String applicationName = "OSAP Calculator 2020";
 	String applicantName = "Joe Doe";
@@ -25,13 +25,6 @@ public class Loan {
 		this.userInterest = 0.0;
 		this.period = 0.0;
 	}
-	
-//	public Loan(double principal, double userInterest, double period) {
-//		this.principal = principal;
-//		this.userInterest = userInterest;
-//		this.period = period;
-//		
-//	}
 	
 	public double computePayment(String p, String a, String i, String g, String gp, String fi) throws Exception {
 		principal = Double.parseDouble(p);
@@ -59,18 +52,21 @@ public class Loan {
 		}
 	}
 	
-	public void errorMessage(double prinicpal, double userInterest, double period) {
-		if (principal <= 0) {
+	public String errorMessage(String prinicpal, String userInterest, String period) {
+		
+		String errorMsg = " ";				// error message
+		if (Double.parseDouble("principal") <= 0) {
 			errorMsg = "Principal must be greater than 0!";
-		} else if (userInterest <= 0) {
+		} else if (Double.parseDouble("interest") <= 0) {
 			errorMsg = "Annual Interest rate must be greater than 0!";
-		} else if (period <= 0) {
+		} else if (Double.parseDouble("period") <= 0) {
 			errorMsg = "Payment Period rate must be greater than 0!";
 		} else {
 			errorMsg = "";
 		}
+		return errorMsg;
 	}
-	
+
 	public static void main(String[] args) {
 		Loan ln = new Loan();
 		System.out.println("default_principal = " + ln.fixedPrincipal);

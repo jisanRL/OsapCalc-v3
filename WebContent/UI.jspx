@@ -39,15 +39,7 @@
 	</form>
 	
 	<BR /><BR />
-	<LABEL>Session</LABEL><BR /><BR />
-	<LABEL> Principal =  ${PRINCIPAL} </LABEL> <BR />
-	<LABEL> Annual Interest =  ${ANNUALINTEREST} </LABEL> <BR />
-	<LABEL> Payment Period =  ${PAYMENTPERIOD} </LABEL> <BR />
 	
-	<LABEL> Grace Interest =  ${GI} </LABEL> <BR />
-	<LABEL> Monthly Payment = ${PAY} </LABEL>
-
-
 </body>
 </html>
 </jsp:root>

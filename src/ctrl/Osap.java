@@ -66,25 +66,14 @@ public class Osap extends HttpServlet {
 		String userInterest = request.getParameter("interest");
 		String period = request.getParameter("period"); 				// grace period
 		
-		//exception
-		String errorMsg = "";
 		
-		if (request.getParameter("calculate") == null ||
-				Double.parseDouble(principal) < 0 || Double.parseDouble(userInterest) < 0 || Double.parseDouble(period) < 0) {
-			
-				if (Double.parseDouble(request.getParameter("principal")) <= 0 ) {
-					errorMsg = "Principal must be greater than 0!";
-				} else if (Double.parseDouble(request.getParameter("interest")) <= 0) {
-					errorMsg = "Annual Interest rate must be greater than 0!";
-				} else if (Double.parseDouble(request.getParameter("period")) <= 0) {
-					errorMsg = "Payment Period rate must be greater than 0!";
-				} else {
-					errorMsg = "";
-				}
-			
-			request.getServletContext().setAttribute("errorMessage", errorMsg);
-			request.getSession().setAttribute("errorMessage", errorMsg);
+		if (request.getParameter("calculate") == null || 
+				Double.parseDouble(principal) < 0 || Double.parseDouble(userInterest) < 0 || Double.parseDouble(period) < 0 ||
+				(request.getParameter("restart") != null && request.getParameter("restart").equals("true"))){
+
+			setErrorResponse(request);
 			request.getRequestDispatcher("/UI.jspx").forward(request, response);  // send to UI page 
+			request.getSession().setAttribute("errorMessage","hello");
 
 		} else if (request.getParameter("calculate") == null || 
 				Double.parseDouble(principal) > 0 || Double.parseDouble(userInterest) > 0 || Double.parseDouble(period) > 0) {
@@ -142,8 +131,7 @@ public class Osap extends HttpServlet {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-	
-			
+				
 			// task E : save session, how do you get the data from servlet into the results page
 			HttpSession session = request.getSession();
 			request.getServletContext().setAttribute("APPNAME", appName);
@@ -173,11 +161,34 @@ public class Osap extends HttpServlet {
 			
 			request.getRequestDispatcher("/Results.jspx").forward(request, response);		// send to results page 
 		
-		} else if (request.getParameter("restart") == null) {
-			request.getRequestDispatcher("/UI.jspx").forward(request, response);  // send to UI page 
+		} else {
+			
 		}
 	}
 
+	/*
+	 * error handler message
+	 */
+	private void setErrorResponse(HttpServletRequest request) {
+		if (request.getParameter("principal") != null && (request.getParameter("period") != null)
+				&& (request.getParameter("interest") != null)) {
+
+			if (Double.parseDouble(request.getParameter("principal")) <= 0) {
+				request.getServletContext().setAttribute("errorMessage",  "Principal muse be greater than 0.");
+//				request.getSession().setAttribute("errorMessage", "Principal muse be greater than 0.");
+			}
+			if (Double.parseDouble(request.getParameter("interest")) <= 0) {
+				request.getServletContext().setAttribute("errorMessage", "Annual Interest must be greater than 0.");
+//				request.getSession().setAttribute("errorMessage", "Interest must be greater than 0.");
+			}
+			if (Double.parseDouble(request.getParameter("period")) <= 0) {
+				request.getServletContext().setAttribute("errorMessage", "Payment Period must be greater than 0.");
+//				request.getSession().setAttribute("errorMessage", "Period must be greater than 0.");
+			}
+		}
+	}
+
+	
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -186,23 +197,3 @@ public class Osap extends HttpServlet {
 		doGet(request, response);
 	}
 }
-
-//debugs 
-//System.out.println("--------------default values----------------------------");
-//System.out.println("default_principal (trivial) = " + default_principal);
-//System.out.println("default_period (trivial) =  " + default_period);
-//System.out.println("fixed_interest =  " + fixed_interest);
-//System.out.println("grace period =  " + gracePeriod);
-//System.out.println("--------------user values----------------------------");
-//System.out.println("principal " + principal);
-//System.out.println("period " + period);
-//System.out.println("user interest " + userInterest);
-//System.out.println("------------------------------------------");
-//System.out.println("Grace Period = " + gracePeriod);
-//System.out.println("Grace Interest =  " + graceInterest);
-//System.out.println("------------------------------------------");
-//System.out.println("------------------------------------------");
-//System.out.println("Final calc: " + payment);
-//System.out.println("------------------------------------------");
-//System.out.println("Content length = " + request.getContentLength() + "\n" + "Content type = " + request.getContentType());
-//System.out.println("Hello, Got a " + cMethod + " request from Osap!");    
